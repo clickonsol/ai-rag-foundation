@@ -1,0 +1,15 @@
+# Ignore the virtual environment directory
+venv/
+Venv/
+ENV/
+env/
+ENV/
+
+# Byte-compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore log files and other system files
+*.log
+*.tmp
+*.swp
