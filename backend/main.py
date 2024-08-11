@@ -2,8 +2,9 @@ import chromadb
 from fastapi import FastAPI, HTTPException
 from typing import List
 from datetime import datetime
-from models import ChatMessage, ChatThread, UserProfile, Document
+from models import ChatMessage, ChatThread, Document, UserProfile
 import openai
+from user_manager import UserManager  # Import the UserManager class
 
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
@@ -35,6 +36,7 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods, including OPTIONS
     allow_headers=["*"],  # Allows all headers
 )
+
 # Initialize ChromaDB client and collection
 embedding_function = OpenAIEmbeddings()
 
@@ -44,6 +46,9 @@ vector_store = Chroma(
     embedding_function=embedding_function,
     persist_directory="chroma_data"  # Optional: Directory to persist data
 )
+
+# Initialize UserManager
+user_manager = UserManager()
 
 # Function to generate response using GPT-4o-mini Chat API
 def generate_response(input_text):
@@ -65,7 +70,6 @@ def generate_response(input_text):
 
 # In-memory storage for demonstration (replace with DB in production)
 chat_history = []
-user_profile = UserProfile(id="1", name="John Doe", email="john@example.com", phone="123456789", address="123 Main St")
 documents = []
 
 @app.get("/")
@@ -92,14 +96,12 @@ def get_chat_history():
 # Endpoint to get user profile
 @app.get("/profile/", response_model=UserProfile)
 def get_profile():
-    return user_profile
+    return user_manager.get_user_profile()
 
 # Endpoint to update user profile
 @app.put("/profile/", response_model=UserProfile)
 def update_profile(profile: UserProfile):
-    global user_profile
-    user_profile = profile
-    return user_profile
+    return user_manager.update_user_profile(profile)
 
 # Endpoint to upload documents and index in ChromaDB
 @app.post("/documents/", response_model=Document)
