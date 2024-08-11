@@ -1,13 +1,22 @@
-version: '3'
+version: '3.8'
+
 services:
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:80"
-  
   backend:
-    build: ./backend
+    build:
+      context: ./backend  # Path to the FastAPI backend
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env  # Point to the .env file inside the backend folder
+
+  frontend:
+    build:
+      context: ./react-dashboard  # Path to the React frontend
+    ports:
+      - "3000:80"
     environment:
-        OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      - REACT_APP_API_URL=http://backend:8000  # Point the frontend to the backend
+    depends_on:
+      - backend

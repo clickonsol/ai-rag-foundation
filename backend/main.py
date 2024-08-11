@@ -25,6 +25,16 @@ if not openai_api_key:
 # Initialize the FastAPI app
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+# Set up CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust this to your allowed origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods, including OPTIONS
+    allow_headers=["*"],  # Allows all headers
+)
 # Initialize ChromaDB client and collection
 embedding_function = OpenAIEmbeddings()
 
@@ -35,11 +45,11 @@ vector_store = Chroma(
     persist_directory="chroma_data"  # Optional: Directory to persist data
 )
 
-# Function to generate response using GPT-4 Chat API
+# Function to generate response using GPT-4o-mini Chat API
 def generate_response(input_text):
-    # Call the OpenAI API using the latest chat completion method
+    # Call the OpenAI API using the chat completion method with your custom model
     response = openai.chat.completions.create(
-    model="gpt-4o-mini",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are a helpful assistant knowledgeable about Python code."},
             {"role": "user", "content": input_text}
@@ -62,7 +72,7 @@ documents = []
 def read_root():
     return {"message": "Welcome to the backend!"}
 
-# Endpoint for chat interface using LangChain with GPT-4 (or similar)
+# Endpoint for chat interface using LangChain with GPT-4o-mini
 @app.post("/chat/")
 def post_message(message: ChatMessage):
     # Generate a response using the generate_response function
